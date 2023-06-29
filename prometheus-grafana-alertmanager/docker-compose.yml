@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+
+  # alertmanager:
+  #   container_name: alertmanager
+  #   hostname: alertmanager
+  #   image: prom/alertmanager
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./config/alertmanager.conf:/etc/alertmanager/alertmanager.conf
+  #   command:
+  #     - '--config.file=/etc/alertmanager/alertmanager.conf'
+  #   ports:
+  #     - 9093:9093
+
+  prometheus:
+    container_name: prometheus
+    hostname: prometheus
+    image: prom/prometheus
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    # links:
+    #   - alertmanager:alertmanager
+    ports:
+      - 9090:9090
+
+  grafana:
+    container_name: grafana
+    hostname: grafana
+    image: grafana/grafana
+    restart: unless-stopped
+    volumes:
+      - ./config/grafana_datasources.yml:/etc/grafana/provisioning/datasources/all.yaml
+      - ./config/grafana_config.ini:/etc/grafana/config.ini
+      - grafana_data:/var/lib/grafana
+    ports:
+      - 3000:3000
+
+networks:
+    monitoring-network:
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
